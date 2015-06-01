@@ -1,5 +1,6 @@
 import string
 import math
+from datetime import datetime
 
 
 def make_boolean(bool_string):
@@ -55,9 +56,14 @@ def parse_boolean(value):
     return make_boolean(str(value))
 
 
-def parse_datetime(value):
-    if len(string.strip(str(value))) == 0:
-        return None
+def parse_datetime(datetime_format):
+    def datetime_parser(value):
+        if len(string.strip(str(value))) == 0:
+            return None
+        else:
+            return datetime.strptime(string.strip(str(value)), datetime_format)
+
+    return datetime_parser
 
 
 def is_integer():
@@ -72,8 +78,8 @@ def is_float():
     return (parse_float, )
 
 
-def is_datetime():
-    return (parse_datetime, )
+def is_datetime(datetime_format):
+    return (parse_datetime(datetime_format), )
 
 
 def is_boolean():
