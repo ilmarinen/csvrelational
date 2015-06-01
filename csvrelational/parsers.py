@@ -34,14 +34,14 @@ def parse_string_remove_nan(value):
 
 
 def parse_int_remove_nan(value):
-    if math.isnan(value):
+    if isinstance(value, float) and math.isnan(value):
         return -1.0
     else:
         return value
 
 
 def parse_date_remove_nan(value):
-    if math.isnan(value):
+    if isinstance(value, float) and math.isnan(value):
         return None
     else:
         return value
