@@ -1,12 +1,13 @@
 from datetime import datetime
 from csvrelational import CSVBase
 from csvrelational.parsers import is_integer, is_datetime, is_float, is_string
+from conftest import User
 
 
 def test_csv_loading():
 
-    class User(CSVBase):
-        __filename__ = './data/users-1.csv'
+    class UserCSV(CSVBase):
+        __filename__ = './tests/data/users-1.csv'
         __separator__ = ','
         __primary_key__ = 'id'
 
@@ -19,7 +20,7 @@ def test_csv_loading():
         score = is_float()
 
 
-    user_df = User.get_dataframe()
+    user_df = UserCSV.get_dataframe()
 
     row3 = user_df.loc[176]
     assert row3['username'] == 'eve'
@@ -41,3 +42,33 @@ def test_csv_loading():
     assert row4['date_of_birth'] == datetime(1927, 7, 15, 0, 0)
     assert row4['age'] == 54
     assert (row4['score'] - 7.6) < 0.0001
+
+
+def test_csv_to_database(db_session):
+
+    class UserCSV(CSVBase):
+        __filename__ = './tests/data/users-1.csv'
+        __model__ = User
+        __separator__ = ','
+        __primary_key__ = 'id'
+
+        id = is_integer()
+        username = is_string()
+        first_name = is_string()
+        last_name = is_string()
+        age = is_integer()
+        date_of_birth = is_datetime('%Y-%m-%d')
+        score = is_float()
+
+    UserCSV.save_to_db(db_session)
+
+    df = UserCSV.get_dataframe()
+
+    for id in df['id']:
+        user_csv = df.loc[id]
+        db_id = user_csv['db_id']
+        user_db = db_session.query(User).filter(User.id==db_id).first()
+        assert user_db.username == user_csv['username']
+        assert user_db.first_name == user_csv['first_name']
+        assert user_db.last_name == user_csv['last_name']
+        assert user_db.score == user_csv['score']

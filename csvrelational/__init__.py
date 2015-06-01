@@ -89,7 +89,7 @@ def get_or_create(session, Model, object_dict, unique_keys, parsers, force_creat
 
 
 def clear_models(session, Model):
-    for model in Model.query.all():
+    for model in session.query(Model).all():
         session.delete(model)
         session.flush()
 
