@@ -108,3 +108,8 @@ def test_csv_to_database_relation(db_session):
 
     assert len(user.emails) == 1
     assert user.emails[0].address == 'max@test.com'
+
+    user = db_session.query(User).filter(User.username == 'madadam').first()
+
+    assert len(user.emails) == 2
+    assert set([email.address for email in user.emails]) == set(['madadam@test.com', 'madadam2@test.com'])
