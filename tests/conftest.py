@@ -1,6 +1,6 @@
-from sqlalchemy import create_engine, Column, Integer, String, Float, DateTime
+from sqlalchemy import create_engine, Column, Integer, String, Float, DateTime, ForeignKey
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import sessionmaker, relationship
 import pytest
 
 
@@ -17,6 +17,15 @@ class User(Base):
     age = Column(Integer)
     date_of_birth = Column(DateTime)
     score = Column(Float)
+    emails = relationship('Email')
+
+
+class Email(Base):
+    __tablename__ = 'emails'
+
+    id = Column(Integer, primary_key=True)
+    user_id = Column(Integer, ForeignKey('users.id'))
+    address = Column(String(50))
 
 
 @pytest.fixture(scope='function')

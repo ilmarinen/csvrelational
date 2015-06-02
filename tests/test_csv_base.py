@@ -1,7 +1,7 @@
 from datetime import datetime
 from csvrelational import CSVBase
-from csvrelational.parsers import is_integer, is_datetime, is_float, is_string
-from conftest import User
+from csvrelational.parsers import is_integer, is_datetime, is_float, is_string, is_foreign_key
+from conftest import User, Email
 
 
 def test_csv_loading():
@@ -72,3 +72,39 @@ def test_csv_to_database(db_session):
         assert user_db.first_name == user_csv['first_name']
         assert user_db.last_name == user_csv['last_name']
         assert user_db.score == user_csv['score']
+
+
+def test_csv_to_database_relation(db_session):
+
+    class UserCSV(CSVBase):
+        __filename__ = './tests/data/users-1.csv'
+        __model__ = User
+        __separator__ = ','
+        __primary_key__ = 'id'
+
+        id = is_integer()
+        username = is_string()
+        first_name = is_string()
+        last_name = is_string()
+        age = is_integer()
+        date_of_birth = is_datetime('%Y-%m-%d')
+        score = is_float()
+
+    class EmailCSV(CSVBase):
+        __filename__ = './tests/data/emails-1.csv'
+        __model__ = Email
+        __separator__ = ','
+        __primary_key__ = 'id'
+        __unique__ = ['address']
+
+        id = is_integer()
+        user_id = is_foreign_key(UserCSV, backref='emails')
+        address = is_string()
+
+    UserCSV.save_to_db(db_session)
+    EmailCSV.save_to_db(db_session)
+
+    user = db_session.query(User).filter(User.username == 'max').first()
+
+    assert len(user.emails) == 1
+    assert user.emails[0].address == 'max@test.com'

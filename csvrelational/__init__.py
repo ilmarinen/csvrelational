@@ -10,7 +10,7 @@ def make_search_expression(Model, model_dict, search_keys):
             search_expression = (getattr(Model, key) == value)
             search_expressions.append(search_expression)
 
-    return sqlalchemy._and(*search_expressions)
+    return sqlalchemy.and_(*search_expressions)
 
 
 def make_dict(raw_dict, keys):
@@ -56,7 +56,7 @@ def get_or_create(session, Model, object_dict, unique_keys, parsers, force_creat
             new_object_dict[key] = parent_db_id
 
             if backref is not None:
-                parent = ParentCSVModel.get_from_db(parent_csv_pk_id)
+                parent = ParentCSVModel.get_from_db(session, parent_csv_pk_id)
                 parents.append((parent, backref))
         else:
             new_object_dict[key] = value
@@ -65,7 +65,7 @@ def get_or_create(session, Model, object_dict, unique_keys, parsers, force_creat
         model = Model(**new_object_dict)
     else:
         search_expression = make_search_expression(Model, new_object_dict, unique_keys)
-        model = Model.query.filter(search_expression).first()
+        model = session.query(Model).filter(search_expression).first()
         if not model:
             model = Model(**new_object_dict)
         else:
@@ -140,7 +140,7 @@ class CSVBaseMeta(type):
     def get_dataframe(self):
         return self._dataframe
 
-    def get_from_db(self, csv_pk):
+    def get_from_db(self, session, csv_pk):
         df = self.get_dataframe()
         row = df.loc[csv_pk]
         Model = self.__model__
@@ -155,7 +155,7 @@ class CSVBaseMeta(type):
             search_keys = self.__unique__
             object_dict = make_dict(row, search_keys)
 
-        return Model.query.filter(make_search_expression(Model, object_dict, search_keys)).first()
+        return session.query(Model).filter(make_search_expression(Model, object_dict, search_keys)).first()
 
     def get_db_id(self, csv_pk):
         df = self.get_dataframe()
