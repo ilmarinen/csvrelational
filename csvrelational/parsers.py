@@ -10,12 +10,12 @@ def make_boolean(bool_string):
         else:
             return False
 
-    if bool_string.strip().lower() in ['y', 'yes', 't', 'true']:
+    if bool_string.strip().lower() in ["y", "yes", "t", "true"]:
         return True
-    elif bool_string.strip().lower() in ['n', 'no', 'f', 'false']:
+    elif bool_string.strip().lower() in ["n", "no", "f", "false"]:
         return False
     else:
-        raise Exception('Not a boolean string')
+        raise Exception("Not a boolean string")
 
 
 def parse_int(value):
@@ -23,13 +23,13 @@ def parse_int(value):
 
 
 def parse_string(value):
-    return string.strip(str(value))
+    return str.strip(str(value))
 
 
 def parse_string_remove_nan(value):
     value = str(value)
-    if value == 'nan':
-        return ''
+    if value == "nan":
+        return ""
     else:
         return value
 
@@ -58,32 +58,32 @@ def parse_boolean(value):
 
 def parse_datetime(datetime_format):
     def datetime_parser(value):
-        if len(string.strip(str(value))) == 0:
+        if len(str.strip(str(value))) == 0:
             return None
         else:
-            return datetime.strptime(string.strip(str(value)), datetime_format)
+            return datetime.strptime(str.strip(str(value)), datetime_format)
 
     return datetime_parser
 
 
 def is_integer():
-    return (parse_int, )
+    return (parse_int,)
 
 
 def is_string():
-    return (parse_string, )
+    return (parse_string,)
 
 
 def is_float():
-    return (parse_float, )
+    return (parse_float,)
 
 
 def is_datetime(datetime_format):
-    return (parse_datetime(datetime_format), )
+    return (parse_datetime(datetime_format),)
 
 
 def is_boolean():
-    return (parse_boolean, )
+    return (parse_boolean,)
 
 
 def is_foreign_key(ParentCSVModel, backref=None):
